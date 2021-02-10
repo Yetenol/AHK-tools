@@ -18,14 +18,10 @@ return
 ; ===== Global shortcuts: =====
 ; Modifier keys:    # Win    ^ Ctrl    + Shift    ! Alt
 ; Notifications flags:
-; - Syntax: TrayTip, Title, Text, , Flags
-; - Default icon: Keyboard icon
-; - e.g.: 0x1 + 0x10 = 0x11 Silent info
-;   0x1 Info icon
-;   0x2 Warning icon
-;   0x3 Error icon
-;   0x10 Silent
-;   0x20 Large icon
+Toast.INFO := 0x1
+Toast.WARNING := 0x2
+Toast.ERROR := 0x3
+Toast.SILENT := 0x10
 
 ; -=-=-=-=-=- Windows Media API -=-=-=-=-=-
 ; Enables remote media control for Netflix, PrimeVideo
@@ -91,7 +87,7 @@ return
     If (ErrorLevel = 0) 
     { ; Capture2Text isn't running
         Run, % ProgramFiles "\Capture2Text\Capture2Text.exe"
-        TrayTip, % "Capture2Text wasn't running", % "Launching it..", , 0x30
+        TrayTip, % "Capture2Text wasn't running", % "Launching it..", , % Toast.SILENT
         
         ; Launch Capture2Text
         ErrorLevel := 0
@@ -201,14 +197,19 @@ return
 
 ; Send PAUSE
 SendPause:
-    TrayTip, % "Send PAUSE", % "Sending PAUSE in 2s",, 0x10
+    TrayTip, % "Send PAUSE", % "Sending PAUSE in 2s",, % Toast.SILENT
     Sleep, 2000
     Send, % "{Pause}"
 return
 
 ; Send CTRL + PAUSE
 SendCtrlBreak:
-    TrayTip, % "Send PAUSE", % "Sending CTRL + PAUSE in 2s",, 0x10
+    TrayTip, % "Send PAUSE", % "Sending CTRL + PAUSE in 2s",, % Toast.SILENT
     Sleep, 2000
     Send, % "{CtrlBreak}"
 return
+
+toast(title, message)
+{
+    TrayTip
+}

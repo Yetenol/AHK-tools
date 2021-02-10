@@ -17,6 +17,7 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
 #+c::
     OldClipboard := ClipboardAll ; Remember the old Clipboard content
 
+    Clipboard := "" ; Clear clipboard
     Send, ^c ; Copy text selection
     Sleep, 100 ; Let clipboard update
 
