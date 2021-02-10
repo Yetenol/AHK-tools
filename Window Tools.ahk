@@ -80,21 +80,29 @@ return
 
 ; Convert screen region to text (Optical character recognition)
 ; - Uses external program Capture2Text.exe
+!+PrintScreen:: ; Reuse last region: (Shift + Alt + PrintScreen)
+!PrintScreen::  ; Select new region          (Alt + PrintScreen)
+    PressingShiftKey := GetKeyState("Shift", "P")
+    
+    CoordMode, mouse, screen
+    MouseGetPos, MouseX, MouseY
 
-; Reuse last region (Shift + Alt + PrintScreen)
-!+PrintScreen::
-    PressingShiftKey := true
-
-    ; Select new region (Alt + PrintScreen)
-!PrintScreen::
     Process, Exist, Capture2Text.exe ; Check whether AutoHotkey.exe is running
-    If (ErrorLevel = 0) ; AutoHotkey.exe is not running
-    {
+    If (ErrorLevel = 0) 
+    { ; Capture2Text isn't running
         Run, % ProgramFiles "\Capture2Text\Capture2Text.exe"
-        TrayTip, Keyboard Shortcuts, Capture2Text was not running, , 0x30
-        Sleep, 1000 ; Let program start
+        TrayTip, % "Capture2Text wasn't running", % "Launching it..", , 0x30
+        
+        ; Launch Capture2Text
+        ErrorLevel := 0
+        while (ErrorLevel = 0)
+        {
+            Process, Exist, Capture2Text.exe ; Check whether AutoHotkey.exe is running
+        }
+
+        Sleep, 1000
+        MouseMove, % MouseX, % MouseY ; Restore previous mouse position
         Send % (PressingShiftKey) ? "!+{PrintScreen}" : "!{PrintScreen}"
-        PressingShiftKey := false
     }
 return
 
