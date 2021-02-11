@@ -6,6 +6,7 @@
 ; Last update: 2021-02-10
 
 #SingleInstance, force ; Override existing instance when lauched again
+SetWorkingDir, % A_ScriptDir ; Ensures a consistent starting directory
 Menu, Tray, Icon, % A_WinDir "\system32\imageres.dll", 174 ; Setup a keyboard as taskbar icon:
 Menu, Tray, Add ; Creates a separator line.
 Menu, Tray, Add, Send Pause, SendPause
@@ -99,20 +100,41 @@ return
     }
 return
 
-; Close active window/tab
-; Activated by touchpad (internal shortcut)
-+Pause::
-Pause::
-    SetTitleMatchMode, 3 ; Window Title must match exactly (used for Adobe's last tab)
-    if WinActive("ahk_exe firefox.exe") ; If active window is a browser
-        || WinActive("ahk_exe msedge.exe") 
-    || WinActive("ahk_exe brave.exe") 
-    || WinActive("ahk_exe code.exe")
-    || WinActive("ahk_exe gitkraken.exe")
-    || (WinActive("ahk_exe AcroRd32.exe") && !WinActive("Adobe Acrobat Reader DC")) ; Adobe has no tab open
-    Send, ^w ; Close active tab
-    else
-        Send, !{F4} ; Close active program
++Pause:: ; Close window                        (Shift + Three finger gesture down)
+Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
+    closeWindow := true
+    if (!GetKeyState("Shift", "P")) ; Is Shift pressed?
+    { ; Window closure isn't force
+        ; Are there tabs to close instead of the entire window?
+        SetTitleMatchMode, 3 ; Window Title must a exactly (used for Adobe's last tab)
+        if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe"))
+        { ; A browser is active
+            closeWindow := false
+        }
+        else if (WinActive("ahk_exe code.exe")) ; Visual Studio Code
+        { ; A tab bases program is active
+            closeWindow := false
+        } 
+        else if (WinActive("ahk_exe AcroRd32.exe") && !WinActive("Adobe Acrobat Reader DC"))
+        { ; Adobe Acrobat Reader DC is active but no tab is open
+            closeWindow := false
+        }
+        else if (WinActive("ahk_exe gitkraken.exe"))
+        { ; GitKraken is active but no tab is open
+            ; Find Gitkraken window
+            CoordMode, pixel, screen
+            WinGetPos, gitkrakenX, gitkrakenY, gitkrakenWidth, gitkrakenHeight, % "ahk_exe gitkraken.exe"
+            
+            ; Is the close tab cross visible? = Multiple tabs open?
+            ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % "..\resources\GitKraken close tab.png"
+            if (!ErrorLevel)
+            { ; Multiple tabs are open
+                closeWindow := false
+            }
+        }
+    }
+
+    Send, % (closeWindow) ? "!{F4}" : "^w" ; Close tab / window
 return
 
 ; Open new tab / Open action center
