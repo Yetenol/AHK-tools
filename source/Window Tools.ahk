@@ -115,19 +115,9 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
         { ; A tab bases program is active
             killTarget := "Tab"
         } 
-        else if (WinActive("ahk_exe AcroRd32.exe"))
+        else if (WinActive("ahk_exe AcroRd32.exe") && !WinActive("Adobe Acrobat Reader DC (32-bit)"))
         { ; Adobe Acrobat Reader DC is active but no tab is open
-            if (!WinActive("Adobe Acrobat Reader DC"))
-            { ; At least one tab is open
-                killTarget := "none"
-                WinWaitActive A ; makes the active window to be the Last Found
-                Send, ^w
-                WinWaitNotActive ; wait for active window to change
-                if (WinActive("Adobe Acrobat Reader DC"))
-                { ; Just closed the last tab
-                    Send, !{F4}
-                }
-            }
+            killTarget := "Tab"
         }
         else if (WinActive("ahk_exe gitkraken.exe"))
         { ; GitKraken is active but no tab is open
