@@ -18,10 +18,7 @@ return
 ; ===== Global shortcuts: =====
 ; Modifier keys:    # Win    ^ Ctrl    + Shift    ! Alt
 ; Notifications flags:
-Toast.INFO := 0x1
-Toast.WARNING := 0x2
-Toast.ERROR := 0x3
-Toast.SILENT := 0x10
+
 
 ; -=-=-=-=-=- Windows Media API -=-=-=-=-=-
 ; Enables remote media control for Netflix, PrimeVideo
@@ -87,7 +84,7 @@ return
     If (ErrorLevel = 0) 
     { ; Capture2Text isn't running
         Run, % ProgramFiles "\Capture2Text\Capture2Text.exe"
-        TrayTip, % "Capture2Text wasn't running", % "Launching it..", , % Toast.SILENT
+        toast("Capture2Text wasn't running", "Launching it..", "S M")
         
         ; Launch Capture2Text
         ErrorLevel := 0
@@ -104,12 +101,14 @@ return
 
 ; Close active window/tab
 ; Activated by touchpad (internal shortcut)
++Pause::
 Pause::
     SetTitleMatchMode, 3 ; Window Title must match exactly (used for Adobe's last tab)
     if WinActive("ahk_exe firefox.exe") ; If active window is a browser
         || WinActive("ahk_exe msedge.exe") 
     || WinActive("ahk_exe brave.exe") 
     || WinActive("ahk_exe code.exe")
+    || WinActive("ahk_exe gitkraken.exe")
     || (WinActive("ahk_exe AcroRd32.exe") && !WinActive("Adobe Acrobat Reader DC")) ; Adobe has no tab open
     Send, ^w ; Close active tab
     else
@@ -197,19 +196,61 @@ return
 
 ; Send PAUSE
 SendPause:
-    TrayTip, % "Send PAUSE", % "Sending PAUSE in 2s",, % Toast.SILENT
+    toast("Send PAUSE", "Sending PAUSE in 2s", "S")
     Sleep, 2000
     Send, % "{Pause}"
 return
 
 ; Send CTRL + PAUSE
 SendCtrlBreak:
-    TrayTip, % "Send PAUSE", % "Sending CTRL + PAUSE in 2s",, % Toast.SILENT
+    toast("Send PAUSE", "Sending CTRL + PAUSE in 2s", "S")
     Sleep, 2000
     Send, % "{CtrlBreak}"
 return
-
-toast(title, message)
+ 
+/* Show a notification
+ * @param (optional) title: Text header
+ * @param (optional) message: Text body
+ * @param (optional) options: space seperated string of flags
+ * ->  "" Default    "I" Info    "W" Warning    "E" Error
+ * ->  "S" Silent
+ * ->  "M" Use AHK's message dialog, pauses the script
+ * -> e.g: "S M" means silent Message Dialog
+ */
+toast(title := "", message := "", options := "")
 {
-    TrayTip
+    if (title = "" && message = "")
+    { ; Empty toast => Hide previous toast
+        if (!InStr(options, "M"))
+        { ; Default windows notification
+            Menu, Tray, NoIcon ; Kills the notification ballon
+            Sleep, 10
+            Menu, Tray, Icon
+        }
+    }
+    else
+    { ; Valid notification text
+        message := (message = "") ? " " :  message  ; Message can't be empty
+
+        flags := 0   ; Read options
+        if (InStr(options, "M"))
+        { ; Use MsgBox Dialog (pauses script)
+            flags += (InStr(options, "I")) ? 0x40 : 0
+            flags += (InStr(options, "W")) ? 0x30 : 0
+            flags += (InStr(options, "E")) ? 0x10 : 0
+
+            MsgBox, flags, title, text
+        }
+        else
+        { ; Default windows notification
+            flags += (InStr(options, "I")) ? 0x1 : 0
+            flags += (InStr(options, "W")) ? 0x2 : 0
+            flags += (InStr(options, "E")) ? 0x3 : 0
+            flags += (InStr(options, "S")) ? 0x10 : 0
+
+            TrayTip, % title, % message,, % flags
+        }
+    }
+
+
 }
