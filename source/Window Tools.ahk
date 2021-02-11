@@ -102,22 +102,32 @@ return
 
 +Pause:: ; Close window                        (Shift + Three finger gesture down)
 Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
-    closeWindow := true
+    killTarget := "Window"
     if (!GetKeyState("Shift", "P")) ; Is Shift pressed?
     { ; Window closure isn't force
         ; Are there tabs to close instead of the entire window?
         SetTitleMatchMode, 3 ; Window Title must a exactly (used for Adobe's last tab)
         if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe"))
         { ; A browser is active
-            closeWindow := false
+            killTarget := "Tab"
         }
         else if (WinActive("ahk_exe code.exe")) ; Visual Studio Code
         { ; A tab bases program is active
-            closeWindow := false
+            killTarget := "Tab"
         } 
-        else if (WinActive("ahk_exe AcroRd32.exe") && !WinActive("Adobe Acrobat Reader DC"))
+        else if (WinActive("ahk_exe AcroRd32.exe"))
         { ; Adobe Acrobat Reader DC is active but no tab is open
-            closeWindow := false
+            if (!WinActive("Adobe Acrobat Reader DC"))
+            { ; At least one tab is open
+                killTarget := "none"
+                WinWaitActive A ; makes the active window to be the Last Found
+                Send, ^w
+                WinWaitNotActive ; wait for active window to change
+                if (WinActive("Adobe Acrobat Reader DC"))
+                { ; Just closed the last tab
+                    Send, !{F4}
+                }
+            }
         }
         else if (WinActive("ahk_exe gitkraken.exe"))
         { ; GitKraken is active but no tab is open
@@ -126,15 +136,19 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
             WinGetPos, gitkrakenX, gitkrakenY, gitkrakenWidth, gitkrakenHeight, % "ahk_exe gitkraken.exe"
             
             ; Is the close tab cross visible? = Multiple tabs open?
-            ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % "..\resources\GitKraken close tab.png"
-            if (!ErrorLevel)
-            { ; Multiple tabs are open
-                closeWindow := false
-            }
+            ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % "..\resources\GitKraken No tab.png"
+            killTarget := (!ErrorLevel) ? "Window" : "Tab"
         }
     }
 
-    Send, % (closeWindow) ? "!{F4}" : "^w" ; Close tab / window
+    if (killTarget = "Window")
+    { ; Close window
+        Send, !{F4}
+    } 
+    else if (killTarget = "Tab")
+    { ; Close tab
+        Send, ^w
+    }
 return
 
 ; Open new tab / Open action center
