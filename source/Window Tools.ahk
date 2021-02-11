@@ -100,13 +100,28 @@ return
     }
 return
 
+^Pause:: ; Close all windows of that process    (Ctrl + Three finger gesture down)
 +Pause:: ; Close window                        (Shift + Three finger gesture down)
 Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
-    killTarget := "Window"
-    if (!GetKeyState("Shift", "P")) ; Is Shift pressed?
-    { ; Window closure isn't force
-        ; Are there tabs to close instead of the entire window?
-        SetTitleMatchMode, 3 ; Window Title must a exactly (used for Adobe's last tab)
+    if (GetKeyState("Ctrl", "P")) ; Is Ctrl pressed?
+    { ; Close active window group
+        killTarget := "WindowGroup"
+        
+        ; Retrive information about active window group
+        WinGet, activeExe, ProcessName, % "A"
+        WinGetClass, activeClass, % "A"
+
+        ; Close all windows of that process
+        GroupAdd, activeGroup, % "ahk_exe " . activeExe . " ahk_class " . activeClass
+        WinClose, ahk_group activeGroup
+    } 
+    else if (GetKeyState("Shift", "P"))
+    { ; Close window
+        killTarget := "Window"
+    }
+    else
+    { ; Close tab (if existing), otherwise close window
+        killTarget := "Window"
         if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe"))
         { ; A browser is active
             killTarget := "Tab"
@@ -116,8 +131,12 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
             killTarget := "Tab"
         } 
         else if (WinActive("ahk_exe AcroRd32.exe") && !WinActive("Adobe Acrobat Reader DC (32-bit)"))
-        { ; Adobe Acrobat Reader DC is active but no tab is open
-            killTarget := "Tab"
+        { ; Adobe Acrobat Reader DC is active
+            SetTitleMatchMode, 3 ; Window Title must be exactly matched
+            if (!WinActive("Adobe Acrobat Reader DC (32-bit)"))
+            { ; Adobe Reader has no tab open
+                killTarget := "Tab"
+            }
         }
         else if (WinActive("ahk_exe gitkraken.exe"))
         { ; GitKraken is active but no tab is open
@@ -127,13 +146,19 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
             
             ; Is the close tab cross visible? = Multiple tabs open?
             ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % "..\resources\GitKraken No tab.png"
-            killTarget := (!ErrorLevel) ? "Window" : "Tab"
+            if (ErrorLevel)
+            { ; At least one tab open
+                killTarget := "Tab"
+            }
         }
     }
-
     if (killTarget = "Window")
     { ; Close window
-        Send, !{F4}
+        WinClose, % "A"
+
+        ; Activate the topmost, unminimized window
+        WinGet, WindowList, List,,, % "ahk_class RainmeterMeterWindow"
+        WinActivate, ahk_id %WindowList2%
     } 
     else if (killTarget = "Tab")
     { ; Close tab
@@ -144,12 +169,14 @@ return
 ; Open new tab / Open action center
 ; Activated by touchpad (internal shortcut)
 CtrlBreak::
-    if WinActive("ahk_exe firefox.exe") ; If active window is a browser
-        || WinActive("ahk_exe msedge.exe") 
-    || WinActive("ahk_exe brave.exe") 
-    Send, ^t ; Open new tab
+    if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe") || WinActive("ahk_exe gitkraken.exe"))
+    { ; Browser(like) window is active
+        Send, ^t ; Open new tab
+    }
     else
+    {
         Send, #a ; Open action center
+    }
 return
 
 ; Pin active window always on top (Win + Numpad-)
@@ -265,7 +292,7 @@ toast(title := "", message := "", options := "")
             flags += (InStr(options, "W")) ? 0x30 : 0
             flags += (InStr(options, "E")) ? 0x10 : 0
 
-            MsgBox, flags, title, text
+            MsgBox, % flags, % title, % message
         }
         else
         { ; Default windows notification
