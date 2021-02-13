@@ -110,14 +110,17 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
         WinGetClass, windowClass, % "A"
 
         windowClosable := false
-        if (windowExe = "Rainmeter.exe" && windowClass = "RainmeterMeterWindow") 
-        {} ; Rainmeter widget
-        else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Shell_TrayWnd")
+
+        if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Shell_TrayWnd")
         {} ; Taskbar
         else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "WorkerW")
         {} ; Desktop
         else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Progman")
         {} ; Desktop
+        else if (windowExe = "ApplicationFrameHost.exe" && windowClass = "ApplicationFrameWindow")
+        {} ; Windows Store Apps
+        else if (windowExe = "Rainmeter.exe" && windowClass = "RainmeterMeterWindow") 
+        {} ; Rainmeter widget
         else
         { ; Valid window found
             windowClosable := true
@@ -132,7 +135,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
             toast(">" . windowExe . "<", ">" . windowClass . "<", "SI")
             WinGet, windowList, List, % "ahk_group activeGroup"
             str := ""
-            loop, % windowList
+            loop, % windowList    
             {
                 window := "ahk_id " . windowList%A_Index%
                 WinGetTitle, title, % window
