@@ -157,13 +157,30 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
         WinClose, % "A"
 
         ; Activate the topmost, unminimized window
-        WinGet, WindowList, List,,, % "ahk_class RainmeterMeterWindow"
-        WinActivate, ahk_id %WindowList2%
+        WinGet, windowList, List,,, % "D:\OneDrive\Documents\Rainmeter" ; Get a sorted list of all windows (foreground to background)
+        WinGet, topmostMinMaxState, MINMAX, ahk %windowList2% ; Select the topmost window that isn't the desktop
+        if (true || topmostMinMaxState != "-1")
+        { ; window isn't minimized
+            WinActivate, ahk_id %windowList2%
+            WinGet, windowExe, ProcessName, ahk_id %windowList2%
+            WinGetTitle, windowTitle, ahk_id %windowList2%
+            toast(windowExe, windowTitle)
+        }
+        else
+        { ; no window in the foreground
+            ; Show desktop
+            Run, % "explorer shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}"
+            
+        }
     } 
     else if (killTarget = "Tab")
     { ; Close tab
         Send, ^w
     }
+return
+
+#o::
+    Run, % "explorer shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}"
 return
 
 ; Open new tab / Open action center
@@ -268,12 +285,13 @@ return
  * ->  "" Default    "I" Info    "W" Warning    "E" Error
  * ->  "S" Silent
  * ->  "M" Use AHK's message dialog, pauses the script
+ * ->  "K" Kill the windows notification
  * -> e.g: "S M" means silent Message Dialog
  */
 toast(title := "", message := "", options := "")
 {
-    if (title = "" && message = "")
-    { ; Empty toast => Hide previous toast
+    if (InStr(options, "K"))
+    { ; Kill previous toast
         if (!InStr(options, "M"))
         { ; Default windows notification
             Menu, Tray, NoIcon ; Kills the notification ballon
