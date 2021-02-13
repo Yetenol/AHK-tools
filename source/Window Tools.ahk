@@ -126,8 +126,23 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
         if (windowClosable)
         {
             ; Close all windows of that process
-            GroupAdd, activeGroup, % "ahk_exe " . windowExe . " ahk_class " . windowClass
-            WinClose, ahk_group activeGroup
+
+            ; Get all candidates for windows of the same window group
+            GroupAdd, % "activeGroup", % "ahk_exe " . windowExe . " ahk_class " . windowClass
+            toast(">" . windowExe . "<", ">" . windowClass . "<", "SI")
+            WinGet, windowList, List, % "ahk_group activeGroup"
+            str := ""
+            loop, % windowList
+            {
+                window := "ahk_id " . windowList%A_Index%
+                WinGetTitle, title, % window
+                WinGet, id, ID, % window . " ahk_exe " . windowExe . " ahk_class " . windowClass
+                str := str . id . "=" . title . "`n"
+
+                WinClose, % "ahk_id " . windowList%A_Index% . " ahk_exe " . windowExe . " ahk_class " . windowClass
+            }
+            toast("Affected apps:", str, "M")
+            ;WinClose, ahk_group activeGroup
             killTarget := "WindowGroup" ; Prevent further kills
         }
         else 
