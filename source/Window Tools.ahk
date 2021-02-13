@@ -112,7 +112,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
         WinGetClass, activeClass, % "A"
 
         ; Close all windows of that process
-        GroupAdd, activeGroup, % "ahk_exe " . activeExe . " ahk_class " . activeClass
+        GroupAdd, activeGroup, % "ahk_exe " . activeExe . " ahk_class " . activeClass,, % "D:\OneDrive\Documents\Rainmeter"
         WinClose, ahk_group activeGroup
     } 
     else if (GetKeyState("Shift", "P"))
@@ -154,23 +154,32 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
     }
     if (killTarget = "Window")
     { ; Close window
-        WinClose, % "A"
+        Send, !{F4}
+        ;WinClose, % "A" ; ,,, % "D:\OneDrive\Documents\Rainmeter"
 
         ; Activate the topmost, unminimized window
-        WinGet, windowList, List,,, % "D:\OneDrive\Documents\Rainmeter" ; Get a sorted list of all windows (foreground to background)
-        WinGet, topmostMinMaxState, MINMAX, ahk %windowList2% ; Select the topmost window that isn't the desktop
-        if (true || topmostMinMaxState != "-1")
-        { ; window isn't minimized
-            WinActivate, ahk_id %windowList2%
-            WinGet, windowExe, ProcessName, ahk_id %windowList2%
-            WinGetTitle, windowTitle, ahk_id %windowList2%
-            toast(windowExe, windowTitle)
-        }
-        else
-        { ; no window in the foreground
-            ; Show desktop
-            Run, % "explorer shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}"
-            
+        WinGet, windowList, List ; Get a sorted list of all windows (foreground to background)
+        loop %windowList%
+        {
+            window := "ahk_id " . windowList%A_Index%
+            WinGet, windowExe, ProcessName, % window
+            WinGetClass, windowClass, % window
+            WinGetTitle, title, % window
+            toast(windowExe, title . "`nClass: >>>" . windowClass . "<<<", "M") 
+
+            if (windowExe = "Rainmeter.exe" && windowClass = "RainmeterMeterWindow") 
+            {} ; Rainmeter widget
+            else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Shell_TrayWnd")
+            {} ; Taskbar
+            else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "WorkerW")
+            {} ; Desktop
+            else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Progman")
+            {} ; Desktop
+            else
+            { ; Valid window found
+                WinActivate, % window
+                break
+            }
         }
     } 
     else if (killTarget = "Tab")
