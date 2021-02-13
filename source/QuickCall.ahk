@@ -8,6 +8,10 @@
 ; Author: Anton Pusch
 ; Last update: 2021-02-10
 
+/* Build command: 
+start "$env:ProgramFiles\AutoHotkey\Compiler\Ahk2Exe.exe" "/in source\QuickCall.ahk /out bin\QuickCall.exe /icon resources\QuickCall.ico"
+*/
+
 #SingleInstance, force ; Override existing instance when lauched again
 SetWorkingDir, % A_ScriptDir ; Ensures a consistent starting directory
 Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as taskbar icon:

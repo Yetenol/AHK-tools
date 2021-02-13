@@ -5,6 +5,10 @@
 ; Author: Anton Pusch
 ; Last update: 2021-02-10
 
+/* Build command: 
+start "$env:ProgramFiles\AutoHotkey\Compiler\Ahk2Exe.exe" "/in source\WindowTools.ahk /out bin\WindowTools.exe /icon resources\WindowTools.ico"
+*/
+
 #SingleInstance, force ; Override existing instance when lauched again
 SetWorkingDir, % A_ScriptDir ; Ensures a consistent starting directory
 Menu, Tray, Icon, % A_WinDir "\system32\imageres.dll", 174 ; Setup a keyboard as taskbar icon:

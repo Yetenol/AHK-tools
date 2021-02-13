@@ -1,8 +1,13 @@
 ; A tool to handle youtube-dl interactions
-; Author:		Anton Pusch
-; Last edit:	2021-02-10
 ; Pressing Win + Y downloads the currently open youtube tab
 ; Pressing Win + Shift + Y the currently open playlist
+
+; Author: Anton Pusch
+; Last update: 2021-02-10
+
+/* Build command: 
+start "$env:ProgramFiles\AutoHotkey\Compiler\Ahk2Exe.exe" "/in source\YoutubeDownloader.ahk /out bin\YoutubeDownloader.exe /icon resources\YoutubeDownloader.ico"
+*/
 
 #SingleInstance, force
 SetWorkingDir, % A_ScriptDir ; Ensures a consistent starting directory
