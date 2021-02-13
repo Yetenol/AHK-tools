@@ -22,13 +22,13 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
     Sleep, 100 ; Let clipboard update
 
     ; Extract the first phone number like (+)12 34 567 890
-    MinPhoneNumberLength := (GetKeyState("Shift", "P")) ? 1 : 5
-    RegExPattern := "[^\d+]*(?<number>\+?\d[\d ]{" . MinPhoneNumberLength . ",}\d)\D*"
+    minLength := (GetKeyState("Shift", "P")) ? 3 : 7
+    RegExPattern := "[^\d+]*(?<number>\+?\d([-/ \\\(\)]{0,2}\d){" . minLength - 1 . ",14})\D*"
     if RegExMatch(Clipboard, RegExPattern, Group) 
     { ; Found a valid phone number in selection
 
         ; Extraced phone number with plus and spaces
-        ; e.g: +12 34 567 890
+        ; e.g: +49 (030)/115-443
         ; - used to display number
         phone_number := GroupNumber
 
