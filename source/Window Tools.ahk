@@ -105,15 +105,36 @@ return
 Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
     if (GetKeyState("Ctrl", "P")) ; Is Ctrl pressed?
     { ; Close active window group
-        killTarget := "WindowGroup"
-        
         ; Retrive information about active window group
-        WinGet, activeExe, ProcessName, % "A"
-        WinGetClass, activeClass, % "A"
+        WinGet, windowExe, ProcessName, % "A"
+        WinGetClass, windowClass, % "A"
 
-        ; Close all windows of that process
-        GroupAdd, activeGroup, % "ahk_exe " . activeExe . " ahk_class " . activeClass,, % "D:\OneDrive\Documents\Rainmeter"
-        WinClose, ahk_group activeGroup
+        windowClosable := false
+        if (windowExe = "Rainmeter.exe" && windowClass = "RainmeterMeterWindow") 
+        {} ; Rainmeter widget
+        else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Shell_TrayWnd")
+        {} ; Taskbar
+        else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "WorkerW")
+        {} ; Desktop
+        else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Progman")
+        {} ; Desktop
+        else
+        { ; Valid window found
+            windowClosable := true
+        }
+
+        if (windowClosable)
+        {
+            ; Close all windows of that process
+            GroupAdd, activeGroup, % "ahk_exe " . windowExe . " ahk_class " . windowClass
+            WinClose, ahk_group activeGroup
+            killTarget := "WindowGroup" ; Prevent further kills
+        }
+        else 
+        {
+            killTarget := "Window" ; Close active window
+        }
+
     } 
     else if (GetKeyState("Shift", "P"))
     { ; Close window
@@ -155,32 +176,6 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
     if (killTarget = "Window")
     { ; Close window
         Send, !{F4}
-        ;WinClose, % "A" ; ,,, % "D:\OneDrive\Documents\Rainmeter"
-
-        ; Activate the topmost, unminimized window
-        WinGet, windowList, List ; Get a sorted list of all windows (foreground to background)
-        loop %windowList%
-        {
-            window := "ahk_id " . windowList%A_Index%
-            WinGet, windowExe, ProcessName, % window
-            WinGetClass, windowClass, % window
-            WinGetTitle, title, % window
-            toast(windowExe, title . "`nClass: >>>" . windowClass . "<<<", "M") 
-
-            if (windowExe = "Rainmeter.exe" && windowClass = "RainmeterMeterWindow") 
-            {} ; Rainmeter widget
-            else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Shell_TrayWnd")
-            {} ; Taskbar
-            else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "WorkerW")
-            {} ; Desktop
-            else if (windowExe = ahk_exe "Explorer.EXE" && windowClass = "Progman")
-            {} ; Desktop
-            else
-            { ; Valid window found
-                WinActivate, % window
-                break
-            }
-        }
     } 
     else if (killTarget = "Tab")
     { ; Close tab
