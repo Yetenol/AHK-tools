@@ -41,12 +41,12 @@ LogStdErrFile := "D:\Dev\Setup-PC\taskbar-tools\err.log"
 #Y::
 entirePlaylist := GetKeyState("Shift","P")
 Url := GetActiveBrowserURL()
-Core := "youtube-dl.exe " . Url
+Core := "youtube-dl.exe " Url
 Core := (entirePlaylist) 
-	? Core . " --no-playlist  --output " StrQuotes DownloadPath "%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s %(id)s %(upload_date)s.%(ext)s" StrQuotes " "
-	: Core . " --yes-playlist --output " StrQuotes DownloadPath "%(uploader)s/%(title)s %(id)s %(upload_date)s.%(ext)s" StrQuotes " "
-Simulate := Core . " --simulate --no-warnings "
-Download := Core . " --mark-watched --console-title --merge-output-format mp4 "
+	? Core " --no-playlist  --output " StrQuotes DownloadPath "%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s %(id)s %(upload_date)s.%(ext)s" StrQuotes " "
+	: Core " --yes-playlist --output " StrQuotes DownloadPath "%(uploader)s/%(title)s %(id)s %(upload_date)s.%(ext)s" StrQuotes " "
+Simulate := Core " --simulate --no-warnings "
+Download := Core " --mark-watched --console-title --merge-output-format mp4 "
 
 if not (Url) {
 	TrayTip, No browser tab found, Try refreshing the page, , 0x3

@@ -134,14 +134,14 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
             ; Close all windows of that process
 
             ; Get all candidates for windows of the same window group
-            GroupAdd, % "activeGroup", % "ahk_exe " . windowExe . " ahk_class " . windowClass
+            GroupAdd, % "activeGroup", % "ahk_exe " windowExe " ahk_class " windowClass
             WinGet, windowList, List, % "ahk_group activeGroup"
 
             ; Double check all candidates
             loop, % windowList    
             {
                 ; Only close candidates of same ProcessName and WindowClass
-                WinClose, % "ahk_id " . windowList%A_Index% . " ahk_exe " . windowExe . " ahk_class " . windowClass
+                WinClose, % "ahk_id " windowList%A_Index% " ahk_exe " windowExe " ahk_class " windowClass
             }
             killTarget := "WindowGroup" ; Prevent further kills
         }
@@ -348,15 +348,15 @@ getFile(filename, validLocations) {
     path := 0
     for i, location in validLocations
     { ; Check all locations and use the first valid one
-        if (FileExist(location . "\" . filename))
+        if (FileExist(location "\" filename))
         { ; Location is valid
-            path := location . "\" . filename
+            path := location "\" filename
             return path
         }
     }
     if (!path)
     { ; No valid location found
-        toast("File missing", A_ScriptDir . "\" . filename, "E")
+        toast("File missing", A_ScriptDir "\" filename, "E")
         return
     }
 }

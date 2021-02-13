@@ -14,7 +14,7 @@ start "$env:ProgramFiles\AutoHotkey\Compiler\Ahk2Exe.exe" "/in source\QuickCall.
 
 #SingleInstance, force ; Override existing instance when lauched again
 SetWorkingDir, % A_ScriptDir ; Ensures a consistent starting directory
-Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as taskbar icon:
+Menu, Tray, Icon, % A_WinDir "\system32\mmres.dll", 8 ; Setup a keyboard as taskbar icon:
 
 ; Extract and call phone number (Shift +) Win + C
 #c::
@@ -27,7 +27,7 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
 
     ; Extract the first phone number like (+)12 34 567 890
     minLength := (GetKeyState("Shift", "P")) ? 3 : 7
-    RegExPattern := "[^\d+]*(?<number>\+?\d([-/ \\\(\)]{0,2}\d){" . minLength - 1 . ",14})\D*"
+    RegExPattern := "[^\d+]*(?<number>\+?\d([-/ \\\(\)]{0,2}\d){" minLength - 1 ",14})\D*"
     if RegExMatch(Clipboard, RegExPattern, Group) 
     { ; Found a valid phone number in selection
 
@@ -38,7 +38,7 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
 
         ; Check which external calling program should be used?
         EnvGet, ProgramFilesx86, ProgramFiles(x86) ; Parentheses in variable names confuse ahk
-        if (FileExist(ProgramFiles . "\WindowsApps\Microsoft.YourPhone_1.21011.127.0_x64__8wekyb3d8bbwe")) 
+        if (FileExist(ProgramFiles "\WindowsApps\Microsoft.YourPhone_1.21011.127.0_x64__8wekyb3d8bbwe")) 
         { ; I personally use "Your Phone" App
 
             ; DISPLAY PHONE NUMBER
@@ -48,12 +48,12 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
             phone_number := StrReplace(phone_number, " ", "") ; remove spaces
 
             ; CALL PHONE NUMBER
-            Run, % "tel:" . phone_number
+            Run, % "tel:" phone_number
             Sleep, 100 ; Let program open
             Send, {Enter}
             Send, {Enter}
 
-        } else if (FileExist(ProgramFilesx86 . "\Avaya\Avaya one-X Communicator\onexcui.exe")) 
+        } else if (FileExist(ProgramFilesx86 "\Avaya\Avaya one-X Communicator\onexcui.exe")) 
         { ; My Work (TÜV) uses Avaya one-X Communicator
 
             ; Is Avaya running?
@@ -69,7 +69,7 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
 
                 if (!FileExist(TrayIconFile)) 
                 {
-                    MsgBox, 0x10, % "File missing", % "Can't find comparison picture for Avaya's tray icon! Insert it here:`n" . A_ScriptDir . "\Avaya tray icon.png", 10
+                    MsgBox, 0x10, % "File missing", % "Can't find comparison picture for Avaya's tray icon! Insert it here:`n" A_ScriptDir "\Avaya tray icon.png", 10
                 } else {
 
                     ; DISPLAY PHONE NUMBER
@@ -77,7 +77,7 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
                     ; - Ctrl+C would copy the unextracted text again
                     ; - To prevent that, unfocus the current window
                     ; - To unfocus the window, create an new gui
-                    Gui, Add, Text,, % "Calling...`n" . phone_number
+                    Gui, Add, Text,, % "Calling...`n" phone_number
                     Gui, Show, Center, % "Calling..."
                     Sleep, 100
 
@@ -86,7 +86,7 @@ Menu, Tray, Icon, % A_WinDir . "\system32\mmres.dll", 8 ; Setup a keyboard as ta
                     phone_number := StrReplace(phone_number, "+", "00") ; don't use plus sign
                     if (StrLen(phone_number) > 4) 
                     { ; Call leaves office => Add a zero at the front
-                        phone_number := "0" . phone_number
+                        phone_number := "0" phone_number
                     }
 
                     ; Push phone number to Avaya's clipboard
