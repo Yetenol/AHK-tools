@@ -51,18 +51,24 @@ toast(title := "", message := "", options := "")
 }
 
 getFile(filename, validLocations) {
-    path := 0
     for i, location in validLocations
     { ; Check all locations and use the first valid one
-        if (FileExist(location "\" filename))
-        { ; Location is valid
-            path := location "\" filename
-            return path
+        if (attributes := FileExist(location))
+        { ; Path is valid
+            if (InStr(attributes, "D"))
+            { ; Path is a directory
+                if (FileExist(location "\" filename))
+                { ; Location contains a valid file
+                    return location "\" filename
+                }
+            }
+            else
+            { ; Location is a valid file
+                return location
+            }
         }
     }
-    if (!path)
-    { ; No valid location found
-        toast("File missing", A_ScriptDir "\" filename, "E")
-        return
-    }
+    ; No valid location found
+    toast("File missing", A_ScriptDir "\" filename, "E")
+    return   
 }
