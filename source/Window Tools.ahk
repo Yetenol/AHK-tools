@@ -20,7 +20,6 @@ return
 ; Modifier keys:    # Win    ^ Ctrl    + Shift    ! Alt
 ; Notifications flags:
 
-
 ; -=-=-=-=-=- Windows Media API -=-=-=-=-=-
 ; Enables remote media control for Netflix, PrimeVideo
 
