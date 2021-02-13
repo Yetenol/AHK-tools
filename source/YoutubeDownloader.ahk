@@ -9,9 +9,10 @@
 start "$env:ProgramFiles\AutoHotkey\Compiler\Ahk2Exe.exe" "/in source\YoutubeDownloader.ahk /out bin\YoutubeDownloader.exe /icon resources\YoutubeDownloader.ico"
 */
 
+#Include, <utilities>
 #SingleInstance, force
 SetWorkingDir, % A_ScriptDir ; Ensures a consistent starting directory
-Menu, Tray, Icon, % "YouTube Downloader.ico" ; Shows a world icon in the system tray
+Menu, Tray, Icon, % getFile("YouTubeDownloader.ico", [".", "..\resources"]) ; Shows a world icon in the system tray
 
 ModernBrowsers := "ApplicationFrameWindow,Chrome_WidgetWin_0,Chrome_WidgetWin_1,Maxthon3Cls_MainFrm,MozillaWindowClass,Slimjet_WidgetWin_1"
 LegacyBrowsers := "IEFrame,OperaWindowClass"
