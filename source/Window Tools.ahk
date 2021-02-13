@@ -178,23 +178,8 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
             WinGetPos, gitkrakenX, gitkrakenY, gitkrakenWidth, gitkrakenHeight, % "ahk_exe gitkraken.exe"
             
             ; Is the close tab cross visible? = Multiple tabs open?
-            filename := "GitKraken No tab.png"
-            validLocations := [".", "..\resources"]
-            path := 0
-            for i, location in validLocations
-            {
-                if (FileExist(location . "\" . filename))
-                {
-                    path := location . "\" . filename
-                    break
-                }
-            }
-            if (!path)
-            {
-                toast("File missing", A_ScriptDir . "\" . filename)
-                return
-            }
-            ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % "..\resources\GitKraken No tab.png"
+            tabCrossImage := getFile("GitKraken NoTabCross.png", [".", "..\resources"])
+            ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % tabCrossImage
             if (ErrorLevel)
             { ; At least one tab open
                 killTarget := "Tab"
@@ -354,6 +339,21 @@ toast(title := "", message := "", options := "")
             TrayTip, % title, % message,, % flags
         }
     }
+}
 
-
+getFile(filename, validLocations) {
+    path := 0
+    for i, location in validLocations
+    { ; Check all locations and use the first valid one
+        if (FileExist(location . "\" . filename))
+        { ; Location is valid
+            path := location . "\" . filename
+            return path
+        }
+    }
+    if (!path)
+    { ; No valid location found
+        toast("File missing", A_ScriptDir . "\" . filename, "E")
+        return
+    }
 }
