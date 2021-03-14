@@ -66,62 +66,54 @@ Menu, Tray, Icon, % A_WinDir "\system32\mmres.dll", 8 ; Setup a keyboard as task
             } 
             else 
             { ; Avaya is running
-                TrayIconFile := "Avaya tray icon.png"
+                ; DISPLAY PHONE NUMBER
+                ; - Avaya one-X Communicator only listens to clipboard changes once you press Ctrl+C
+                ; - Ctrl+C would copy the unextracted text again
+                ; - To prevent that, unfocus the current window
+                ; - To unfocus the window, create an new gui
+                Gui, Add, Text,, % "Calling...`n" phone_number
+                Gui, Show, Center, % "Calling..."
+                Sleep, 100
 
-                if (!FileExist(TrayIconFile)) 
-                {
-                    MsgBox, 0x10, % "File missing", % "Can't find comparison picture for Avaya's tray icon! Insert it here:`n" A_ScriptDir "\Avaya tray icon.png", 10
-                } else {
-
-                    ; DISPLAY PHONE NUMBER
-                    ; - Avaya one-X Communicator only listens to clipboard changes once you press Ctrl+C
-                    ; - Ctrl+C would copy the unextracted text again
-                    ; - To prevent that, unfocus the current window
-                    ; - To unfocus the window, create an new gui
-                    Gui, Add, Text,, % "Calling...`n" phone_number
-                    Gui, Show, Center, % "Calling..."
-                    Sleep, 100
-
-                    ; FORMAT PHONE NUMBER
-                    phone_number := StrReplace(phone_number, " ", "") ; remove spaces
-                    phone_number := StrReplace(phone_number, "+", "00") ; don't use plus sign
-                    if (StrLen(phone_number) > 4) 
-                    { ; Call leaves office => Add a zero at the front
-                        phone_number := "0" phone_number
-                    }
-
-                    ; Push phone number to Avaya's clipboard
-                    Clipboard := phone_number ; Insert to clipboard
-                    Send, ^c ; Force update Avaya's cache
-
-                    ; Remember the old mouse position
-                    CoordMode, mouse, screen
-                    MouseGetPos, OldMouseX, OldMouseY
-
-                    ; Find the Avaya icon in the taskbar tray icons
-                    CoordMode, pixel, screen
-                    WinGetPos, trayX, trayY, trayWidth, trayHeight, ahk_class Shell_TrayWnd
-                    ImageSearch, imageX, imageY, trayX, trayY, % trayX + trayWidth, % trayY + trayHeight, % TrayIconFile
-                    if (!imageX || !imageY)
-                    { ; Avaya icon couldn't be found (Wrong resolution? => Update Avaya.png)
-                        MsgBox, 0x30, % "No taskbar tray icon found", % "Couldn't find Avaya's tray icon. Try again!", 5
-                    } else 
-                    { ; Found Avaya's tray icon
-
-                        ; Open Avaya's tray menu
-                        MouseMove, % imageX, % imageY, 0
-                        MouseClick, Right, % imageX, % imageY
-
-                        ; CALL PHONE NUMBER
-                        Sleep, 500 ; Await Avaya's tray menu
-                        Send, {Down}
-                        Send, {Enter} ; Click "Call the clipboard number"
-
-                        MouseMove, % OldMouseX,% OldMouseY, 0 ; Restore previous mouse position
-                        Sleep, 100 ; Don't confuse Avaya's clipboard number
-                    }
-                    Gui, Destroy ; Restore focus by closing the gui
+                ; FORMAT PHONE NUMBER
+                phone_number := StrReplace(phone_number, " ", "") ; remove spaces
+                phone_number := StrReplace(phone_number, "+", "00") ; don't use plus sign
+                if (StrLen(phone_number) > 4) 
+                { ; Call leaves office => Add a zero at the front
+                    phone_number := "0" phone_number
                 }
+
+                ; Push phone number to Avaya's clipboard
+                Clipboard := phone_number ; Insert to clipboard
+                Send, ^c ; Force update Avaya's cache
+
+                ; Remember the old mouse position
+                CoordMode, mouse, screen
+                MouseGetPos, OldMouseX, OldMouseY
+
+                ; Find the Avaya icon in the taskbar tray icons
+                CoordMode, pixel, screen
+                WinGetPos, trayX, trayY, trayWidth, trayHeight, ahk_class Shell_TrayWnd
+                ImageSearch, imageX, imageY, trayX, trayY, % trayX + trayWidth, % trayY + trayHeight, % getFile("Avaya tray icon.png", [".", "..\resources"])
+                if (!imageX || !imageY)
+                { ; Avaya icon couldn't be found (Wrong resolution? => Update Avaya.png)
+                    MsgBox, 0x30, % "No taskbar tray icon found", % "Couldn't find Avaya's tray icon. Try again!", 5
+                } else 
+                { ; Found Avaya's tray icon
+
+                    ; Open Avaya's tray menu
+                    MouseMove, % imageX, % imageY, 0
+                    MouseClick, Right, % imageX, % imageY
+
+                    ; CALL PHONE NUMBER
+                    Sleep, 500 ; Await Avaya's tray menu
+                    Send, {Down}
+                    Send, {Enter} ; Click "Call the clipboard number"
+
+                    MouseMove, % OldMouseX,% OldMouseY, 0 ; Restore previous mouse position
+                    Sleep, 100 ; Don't confuse Avaya's clipboard number
+                }
+                Gui, Destroy ; Restore focus by closing the gui
             }
         } else {
             TrayTip, % "No phone app", % "Couldn't find any phone app", , 0x13
