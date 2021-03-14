@@ -159,7 +159,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
     else
     { ; Close tab (if existing), otherwise close window
         killTarget := "Window"
-        if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe"))
+        if (BrowserActive())
         { ; A browser is active
             killTarget := "Tab"
         }
@@ -200,14 +200,10 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
     }
 return
 
-#o::
-    Run, % "explorer shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}"
-return
-
 ; Open new tab / Open action center
 ; Activated by touchpad (internal shortcut)
 CtrlBreak::
-    if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe") || WinActive("ahk_exe gitkraken.exe"))
+    if (BrowserActive() || WinActive("ahk_exe gitkraken.exe"))
     { ; Browser(like) window is active
         Send, ^t ; Open new tab
     }

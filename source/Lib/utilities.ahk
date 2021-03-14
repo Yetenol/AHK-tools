@@ -72,3 +72,8 @@ getFile(filename, validLocations) {
     toast("File missing", A_ScriptDir "\" filename, "E")
     return   
 }
+
+; Is the active window a browser?
+BrowserActive() {
+    return WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe") || WinActive("ahk_exe chrome.exe")
+}
