@@ -70,12 +70,6 @@ MediaWind(direction)
     return
 }
 
-; Bring the Rainmeter widgets to the foreground (Win + Shift + R)
-; - can be used as screensaver
-#+r::
-    Run, restartRainmeter.ps1.bat
-return
-
 ^Pause:: ; Close all windows of that process    (Ctrl + Three finger gesture down)
 +Pause:: ; Close window                        (Shift + Three finger gesture down)
 Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
