@@ -71,9 +71,11 @@ MediaWind(direction)
     return
 }
 
-^Pause:: ; Close all windows of that process    (Ctrl + Three finger gesture down)
-+Pause:: ; Close window                        (Shift + Three finger gesture down)
-Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
+; ==================== Touchpad gestures ====================
+; ===== Close gesture =====
+^Pause:: ; Close all windows of that process    (Ctrl + Three finger down)
++Pause:: ; Close window                        (Shift + Three finger down)
+Pause:: ; Close tab if existing otherwise close window (Three finger down)
     if (GetKeyState("Ctrl", "P")) ; Is Ctrl pressed?
     { ; Close active window group
         ; Retrive information about active window group
