@@ -50,6 +50,9 @@ toast(title := "", message := "", options := "")
     }
 }
 
+; Handle external resource
+; - Get the correct filepath from multiple posibilities
+; - Display error messages
 getFile(filename, validLocations) {
     for i, location in validLocations
     { ; Check all locations and use the first valid one
@@ -73,7 +76,42 @@ getFile(filename, validLocations) {
     return   
 }
 
-; Is the active window a browser?
-BrowserActive() {
-    return WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe") || WinActive("ahk_exe chrome.exe")
+; Find a specific image inside a window
+locateImageInWindow(window, imagePath) {
+    Coordmode, % "pixel", % "screen"
+    if(!WinExist(window))
+    { ; Window doesn't exist
+        toast("Targeted window doesn't exist", "Window:`t" window "`nImage:`t" imagePath, "E")
+    }
+    WinGetPos, x, y, width, height, % window
+    
+    ImageSearch, imageX, imageY, x, y, % x + width, % y + height, % imagePath
+    if (ErrorLevel)
+    { ; Cannot find image! => At least one tab open
+        return false
+    }
+    else
+    { ; Image was found
+        return [imageX, imageY]
+    }
+}
+
+; Click a specific image inside a window
+clickImageInWindow(window, imagePath) {
+    if (!locateImageInWindow(window, imagePath))
+    { ; Cannot find image!
+        toast("Targeted image cannot be found!", "Window:`t" window "`nImage:`t" imagePath, "E")
+    }
+    else
+    { ; Image was found!
+        ; Click the image
+        Coordmode, % "mouse", % "screen"
+        MouseGetPos, mouseX, mouseY
+        Coordmode, % "pixel", % "screen"
+
+        Click, % imageX " " imageY
+        
+        ; Keep previous mouse position
+        MouseMove, % mouseX, % mouseY
+    }
 }
