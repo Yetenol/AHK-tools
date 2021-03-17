@@ -171,7 +171,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
                     else
                     { ; Cannot find image! => No client open
                         killTarget := "none"
-                        MsgBox, % 0x24, % "No more clients found!", % "Do you want to exit?", % 3
+                        toastQuestion("No more clients found!", "Do you want to exit?", 3)
                         IfMsgBox, Yes
                         {
                             killTarget := "Window"
@@ -200,7 +200,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
 return
 
 #o::
-   toastInfo("Info", "Ich bin der Informationstext", 2)
+   toastInfo("Info", "Ich bin der Informationstext", 2, false)
 return
 
 #+o::
@@ -215,7 +215,7 @@ CtrlBreak:: ; Open new tab / Open action center (Three finger tap)
         image := getFile("BMC environment tab.png", [".", "..\resources"])
         if (!clickImageInWindow("ahk_exe bMC.exe", image))
         { ; Cannot find image!
-            toast("Cannot find Environment tab", "", "E")
+            toastError("Cannot find Environment tab")
         }
     }
     else if (BrowserActive() || WinActive("ahk_exe gitkraken.exe"))
@@ -302,14 +302,14 @@ return
 
 ; Send PAUSE
 SendPause:
-    toast("Send PAUSE", "Sending PAUSE in 2s", "S")
+    toastInfo("Send PAUSE", "Sending PAUSE in 2s",, false)
     Sleep, 2000
     Send, % "{Pause}"
 return
 
 ; Send CTRL + PAUSE
 SendCtrlBreak:
-    toast("Send PAUSE", "Sending CTRL + PAUSE in 2s", "S")
+    toastInfo("Send PAUSE", "Sending CTRL + PAUSE in 2s",, false)
     Sleep, 2000
     Send, % "{CtrlBreak}"
 return

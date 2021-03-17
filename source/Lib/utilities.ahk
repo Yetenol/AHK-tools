@@ -17,22 +17,22 @@
 ;error() {
 ;    toast
 ;}
-toastError(title := "", message := "", timeout := -1, options := 0, doSound := true) {
-    toast(title, message, timeout, options, doSound, "Error")
+toastError(title := "", message := "", timeout := -1, doSound := true, options := 0) {
+    toast(title, message, timeout, doSound, options, "Error")
 }
-toastInfo(title := "", message := "", timeout := -1, options := 0, doSound := true) {
-    toast(title, message, timeout, options, doSound,  "Info")
+toastInfo(title := "", message := "", timeout := -1, doSound := true, options := 0) {
+    toast(title, message, timeout, doSound, options,  "Info")
 }
-toastQuestion(title := "", message := "", timeout := -1, options := 0, doSound := true) {
-    toast(title, message, timeout, options, doSound,  "Question")
+toastQuestion(title := "", message := "", timeout := -1, doSound := true, options := 0) {
+    toast(title, message, timeout, doSound, options,  "Question")
 }
-toastWarning(title := "", message := "", timeout := -1, options := 0, doSound := true) {
-    toast(title, message, timeout, options, doSound,  "Warning")
+toastWarning(title := "", message := "", timeout := -1, doSound := true, options := 0) {
+    toast(title, message, timeout, doSound, options,  "Warning")
 }
 
 
 
-toast(title := "", message := "", timeout := -1, options := 0, doSound := true, styleIcon := "")
+toast(title := "", message := "", timeout := -1, doSound := true, options := 0, styleIcon := "")
 {
     ; Deside whether to use native Balloon notifications or a Message Box
     EnvGet, domain, USERDOMAIN
@@ -54,6 +54,12 @@ toast(title := "", message := "", timeout := -1, options := 0, doSound := true, 
             flags |= 0x2
         }
 
+        ; delete notification queue
+        if (timeout != -1)  
+        {
+            killBalloon()
+        }
+
         ; display notification
         TrayTip, % title, % message,, % flags
 
@@ -61,11 +67,7 @@ toast(title := "", message := "", timeout := -1, options := 0, doSound := true, 
         if (timeout != -1)
         {
             Sleep, timeout * 1000
-
-            ; Kill the notification queue and all it's balloons
-            Menu, Tray, NoIcon
-            Sleep, 10
-            Menu, Tray, Icon
+            killBalloon()
         }
     }
     else 
@@ -81,11 +83,17 @@ toast(title := "", message := "", timeout := -1, options := 0, doSound := true, 
         } else if (styleIcon = "Warning") {
             options := (options & ~0xf0) | 0x30
         }
-        
-        ; display notification        
+
+        ; display notification    
         MsgBox, % options, % title, % message, % timeout
-        
     }
+}
+
+; Kill the notification queue and all it's balloons
+killBalloon() {
+    Menu, Tray, NoIcon
+    Sleep, 10
+    Menu, Tray, Icon
 }
 
 ; Handle external resource
