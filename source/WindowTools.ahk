@@ -149,8 +149,8 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
             WinGetPos, gitkrakenX, gitkrakenY, gitkrakenWidth, gitkrakenHeight, % "ahk_exe gitkraken.exe"
             
             ; Is the close tab cross visible? = Multiple tabs open?
-            tabCrossImage := getFile("GitKraken NoTabCross.png", [".", "..\resources"])
-            ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % tabCrossImage
+            singleEmptyTab_Image := getFile("GitKraken single empty tab.png", [".", "..\resources"])
+            ImageSearch,,, winX, winY, % winX + winWidth, % winY + winHeight, % singleEmptyTab_Image
             if (ErrorLevel)
             { ; At least one tab open
                 killTarget := "Tab"
