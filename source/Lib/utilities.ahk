@@ -17,11 +17,22 @@
 ;error() {
 ;    toast
 ;}
+toastError(title := "", message := "", timeout := -1, options := 0) {
+    toast(title, message, options,, "Error")
+}
+toastInfo(title := "", message := "", timeout := -1, options := 0) {
+    toast(title, message, options,, "Info")
+}
+toastWarning(title := "", message := "", timeout := -1, options := 0) {
+    toast(title, message, options,, "Warning")
+}
 
-toast(title := "", message := "", options := "")
+toast(title := "", message := "", timeout := -1, options := 0, styleIcon = "")
 {
+    ; Deside whether to use native Balloon notifications or a Message Box
     EnvGet, domain, USERDOMAIN
-
+    design := (options|| domain = "TUV") ? "Message Box" : "Balloon"
+    
     if (InStr(options, "K"))
     { ; Kill previous toast
         if (!InStr(options, "M"))

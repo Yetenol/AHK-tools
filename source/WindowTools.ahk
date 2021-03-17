@@ -200,7 +200,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
 return
 
 #o::
-    toast("Title", "Text...", "I")
+    toast("Title", "Text...", "IM")
 return
 
 #+o::
