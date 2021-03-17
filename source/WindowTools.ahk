@@ -199,14 +199,6 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
     }
 return
 
-#o::
-   toastInfo("Info", "Ich bin der Informationstext", 2, false)
-return
-
-#+o::
-    toastError("Error", "Ich bin ein Fehler", 3)
-return
-
 ; ===== Open gesture =====
 CtrlBreak:: ; Open new tab / Open action center (Three finger tap)
     if (WinActive("ahk_exe bMC.exe"))
