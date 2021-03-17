@@ -76,34 +76,6 @@ MediaWind(direction)
     Run, restartRainmeter.ps1.bat
 return
 
-; Convert screen region to text (Optical character recognition)
-; - Uses external program Capture2Text.exe
-!+PrintScreen:: ; Reuse last region: (Shift + Alt + PrintScreen)
-!PrintScreen::  ; Select new region          (Alt + PrintScreen)
-    PressingShiftKey := GetKeyState("Shift", "P")
-    
-    CoordMode, mouse, screen
-    MouseGetPos, MouseX, MouseY
-
-    Process, Exist, Capture2Text.exe ; Check whether AutoHotkey.exe is running
-    If (ErrorLevel = 0) 
-    { ; Capture2Text isn't running
-        Run, % ProgramFiles "\Capture2Text\Capture2Text.exe"
-        toast("Capture2Text wasn't running", "Launching it..", "S M")
-        
-        ; Launch Capture2Text
-        ErrorLevel := 0
-        while (ErrorLevel = 0)
-        {
-            Process, Exist, Capture2Text.exe ; Check whether AutoHotkey.exe is running
-        }
-
-        Sleep, 1000
-        MouseMove, % MouseX, % MouseY ; Restore previous mouse position
-        Send % (PressingShiftKey) ? "!+{PrintScreen}" : "!{PrintScreen}"
-    }
-return
-
 ^Pause:: ; Close all windows of that process    (Ctrl + Three finger gesture down)
 +Pause:: ; Close window                        (Shift + Three finger gesture down)
 Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
