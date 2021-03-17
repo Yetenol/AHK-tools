@@ -21,18 +21,19 @@ Menu, Tray, Add, Send Ctrl+Pause, SendCtrlBreak
 SetNumLockState, AlwaysOn
 return
 
-; ===== Global shortcuts: =====
-; Modifier keys:    # Win    ^ Ctrl    + Shift    ! Alt
-; Notifications flags:
+; ==================== Window Lists: ====================
 
-; -=-=-=-=-=- Windows Media API -=-=-=-=-=-
-; Enables remote media control for Netflix, PrimeVideo
+BrowserActive() { ; Is the active window a browser?
+    return WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe") || WinActive("ahk_exe chrome.exe")
+}
 
-; Is active window a media player?
-MediaPlayerActive() {
+MediaPlayerActive() { ; Is active window a media player?
     return (WinActive("Netflix ahk_class ApplicationFrameWindow") ;  Netflix
         || WinActive("Amazon Prime Video for Windows ahk_class ApplicationFrameWindow")) ; PrimeVideo
 }
+
+; ==================== Windows Media API ====================
+; Enables remote media control for Netflix, PrimeVideo
 
 ; Play/Pause media (Netflix, PrimeVideo)
 Media_Play_Pause::
@@ -166,10 +167,10 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
     }
 return
 
-; Open new tab / Open action center
-; Activated by touchpad (internal shortcut)
-CtrlBreak::
-    if (BrowserActive() || WinActive("ahk_exe gitkraken.exe"))
+; ===== Open gesture =====
+CtrlBreak:: ; Open new tab / Open action center (Three finger tap)
+    if (WinActive("ahk_exe bMC.exe"))
+    { ; Baramundi Managment Center
     { ; Browser(like) window is active
         Send, ^t ; Open new tab
     }
@@ -178,6 +179,8 @@ CtrlBreak::
         Send, #a ; Open action center
     }
 return
+
+; ==================== Window shortcuts ====================
 
 ; Pin active window always on top (Win + Numpad-)
 #NumpadSub::
@@ -202,6 +205,8 @@ return
     Sleep, 2000
     Send, {LWin}
 return
+
+; ==================== Transparency shortcuts ====================
 
 ; Make active window transparent
 ; - Uses external program nircmd in path location
