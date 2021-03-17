@@ -146,19 +146,44 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
         }
         else if (WinActive("ahk_exe bMC.exe"))
         { ; Baramundi Managment Center
-            ; BMC Expand client
-            killTarget := "Tab"
+            ; Is the active tab a client?
+            image := getFile("BMC Active client.png", [".", "..\resources"])
+            if (locateImageInWindow("ahk_exe bMC.exe", image))
+            { ; Found image! => Active tab is a client
+                killTarget := "Tab"
+            }
+            else
+            { ; Cannot find image! => No client is active
+                ; Is there an inactive client open?
+                image := getFile("BMC Inactive client.png", [".", "..\resources"])
+                if (clickImageInWindow("ahk_exe bMC.exe", image))
+                { ; Found image! => Switched to inactive client
+                    killTarget := "Tab"
+                }
+                else
+                { ; Cannot find image! => No clients are open
+                    ; Protected tab shoundn't be closed
+                    image := getFile("BMC Expand client.png", [".", "..\resources"])
+                    if (clickImageInWindow("ahk_exe bMC.exe", image))
+                    { ; Found image! => At least one client open
+                        killTarget := "none"
+                    }
+                    else
+                    { ; Cannot find image! => No client open
+                        killTarget := "none"
+                        MsgBox, % 0x24, % "No more clients found!", % "Do you want to exit?", % 3
+                        IfMsgBox, Yes
+                        {
+                            killTarget := "Window"
+                        }
+                    }
+                }
+            }
         }
         else if (WinActive("ahk_exe gitkraken.exe"))
         { ; GitKraken is active but no tab is open
-            ; Find Gitkraken window
-            Coordmode, % "pixel", % "screen"
-            WinGetPos, winX, winY, winWidth, winHeight, % "ahk_exe gitkraken.exe"
-            
-            ; Is the close tab cross visible? = Multiple tabs open?
-            singleEmptyTab_Image := getFile("GitKraken single empty tab.png", [".", "..\resources"])
-            ImageSearch,,, winX, winY, % winX + winWidth, % winY + winHeight, % singleEmptyTab_Image
-            if (ErrorLevel)
+            image := getFile("GitKraken single empty tab.png", [".", "..\resources"])
+            if (!locateImageInWindow("ahk_exe gitkraken.exe", image))
             { ; Cannot find image! => At least one tab open
                 killTarget := "Tab"
             }
@@ -178,25 +203,11 @@ return
 CtrlBreak:: ; Open new tab / Open action center (Three finger tap)
     if (WinActive("ahk_exe bMC.exe"))
     { ; Baramundi Managment Center
-        WinGetPos, winX, winY, winWidth, winHeight, % "ahk_exe bMC.exe"
-
-        ; Where is the Environment tab?
-        environmentTab_Image := getFile("BMC environment tab.png", [".", "..\resources"])
-        ImageSearch, imageX, imageY, winX, winY, % winX + winWidth, % winY + winHeight, % environmentTab_Image
-        if (ErrorLevel)
-        { ; Cannot find image! => Something wrong
+        ; Open the Environment tab?
+        image := getFile("BMC environment tab.png", [".", "..\resources"])
+        if (!clickImageInWindow("ahk_exe bMC.exe", image))
+        { ; Cannot find image!
             toast("Cannot find Environment tab", "", "E")
-        } ; Image found!
-        else
-        {
-            ; Click on the environment tab
-            Coordmode, % "mouse", % "screen"
-            MouseGetPos, mouseX, mouseY
-            Coordmode, % "pixel", % "screen"
-
-            Click, % imageX " " imageY
-            
-            MouseMove, % mouseX, % mouseY
         }
     }
     else if (BrowserActive() || WinActive("ahk_exe gitkraken.exe"))

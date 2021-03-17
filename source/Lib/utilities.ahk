@@ -86,21 +86,27 @@ locateImageInWindow(window, imagePath) {
     WinGetPos, x, y, width, height, % window
     
     ImageSearch, imageX, imageY, x, y, % x + width, % y + height, % imagePath
-    if (ErrorLevel)
+    if (ErrorLevel = 2)
+    { ; PROBLEM that prevented the command from conducting the search (such as failure to open the image file or a badly formatted option)
+        toast("Failure to execute imageSearch", "Window:`t" window "`nImage:`t" imagePath, "E")
+        return {}
+    }
+    else if (ErrorLevel = 1)
     { ; Cannot find image! => At least one tab open
         return false
     }
     else
-    { ; Image was found
-        return [imageX, imageY]
+    { ; Image was found!
+        return {x: imageX, y: imageY}
     }
 }
 
 ; Click a specific image inside a window
 clickImageInWindow(window, imagePath) {
-    if (!locateImageInWindow(window, imagePath))
+    image := locateImageInWindow(window, imagePath)
+    if (!image)
     { ; Cannot find image!
-        toast("Targeted image cannot be found!", "Window:`t" window "`nImage:`t" imagePath, "E")
+        return false
     }
     else
     { ; Image was found!
@@ -109,9 +115,10 @@ clickImageInWindow(window, imagePath) {
         MouseGetPos, mouseX, mouseY
         Coordmode, % "pixel", % "screen"
 
-        Click, % imageX " " imageY
+        Click, % image.x " " image.y
         
         ; Keep previous mouse position
         MouseMove, % mouseX, % mouseY
+        return true
     }
 }
