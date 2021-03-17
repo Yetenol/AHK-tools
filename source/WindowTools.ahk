@@ -199,6 +199,14 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
     }
 return
 
+#o::
+    toast("Title", "Text...", "I")
+return
+
+#+o::
+    toast("Title", "Text...", "IM")
+return
+
 ; ===== Open gesture =====
 CtrlBreak:: ; Open new tab / Open action center (Three finger tap)
     if (WinActive("ahk_exe bMC.exe"))

@@ -14,8 +14,14 @@
  * ->  "K" Kill the windows notification
  * -> e.g: "S M" means silent Message Dialog
  */
+;error() {
+;    toast
+;}
+
 toast(title := "", message := "", options := "")
 {
+    EnvGet, domain, USERDOMAIN
+
     if (InStr(options, "K"))
     { ; Kill previous toast
         if (!InStr(options, "M"))
@@ -30,7 +36,7 @@ toast(title := "", message := "", options := "")
         message := (message = "") ? " " :  message  ; Message can't be empty
 
         flags := 0   ; Read options
-        if (InStr(options, "M"))
+        if (InStr(options, "M") || domain = "TUV")
         { ; Use MsgBox Dialog (pauses script)
             flags += (InStr(options, "I")) ? 0x40 : 0
             flags += (InStr(options, "W")) ? 0x30 : 0
