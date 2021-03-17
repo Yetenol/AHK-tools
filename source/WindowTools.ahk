@@ -152,14 +152,14 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
         else if (WinActive("ahk_exe gitkraken.exe"))
         { ; GitKraken is active but no tab is open
             ; Find Gitkraken window
-            CoordMode, pixel, screen
-            WinGetPos, gitkrakenX, gitkrakenY, gitkrakenWidth, gitkrakenHeight, % "ahk_exe gitkraken.exe"
+            Coordmode, % "pixel", % "screen"
+            WinGetPos, winX, winY, winWidth, winHeight, % "ahk_exe gitkraken.exe"
             
             ; Is the close tab cross visible? = Multiple tabs open?
             singleEmptyTab_Image := getFile("GitKraken single empty tab.png", [".", "..\resources"])
             ImageSearch,,, winX, winY, % winX + winWidth, % winY + winHeight, % singleEmptyTab_Image
             if (ErrorLevel)
-            { ; At least one tab open
+            { ; Cannot find image! => At least one tab open
                 killTarget := "Tab"
             }
         }
