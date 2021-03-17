@@ -200,11 +200,11 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
 return
 
 #o::
-    toast("Title", "Text...", "IM")
+   toastInfo("Info", "Ich bin der Informationstext", 2)
 return
 
 #+o::
-    toast("Title", "Text...", "IM")
+    toastError("Error", "Ich bin ein Fehler", 3)
 return
 
 ; ===== Open gesture =====

@@ -17,53 +17,74 @@
 ;error() {
 ;    toast
 ;}
-toastError(title := "", message := "", timeout := -1, options := 0) {
-    toast(title, message, options,, "Error")
+toastError(title := "", message := "", timeout := -1, options := 0, doSound := true) {
+    toast(title, message, timeout, options, doSound, "Error")
 }
-toastInfo(title := "", message := "", timeout := -1, options := 0) {
-    toast(title, message, options,, "Info")
+toastInfo(title := "", message := "", timeout := -1, options := 0, doSound := true) {
+    toast(title, message, timeout, options, doSound,  "Info")
 }
-toastWarning(title := "", message := "", timeout := -1, options := 0) {
-    toast(title, message, options,, "Warning")
+toastQuestion(title := "", message := "", timeout := -1, options := 0, doSound := true) {
+    toast(title, message, timeout, options, doSound,  "Question")
+}
+toastWarning(title := "", message := "", timeout := -1, options := 0, doSound := true) {
+    toast(title, message, timeout, options, doSound,  "Warning")
 }
 
-toast(title := "", message := "", timeout := -1, options := 0, styleIcon = "")
+
+
+toast(title := "", message := "", timeout := -1, options := 0, doSound := true, styleIcon := "")
 {
     ; Deside whether to use native Balloon notifications or a Message Box
     EnvGet, domain, USERDOMAIN
-    design := (options|| domain = "TUV") ? "Message Box" : "Balloon"
+    design := (options || domain = "TUV") ? "Message Box" : "Balloon"
     
-    if (InStr(options, "K"))
-    { ; Kill previous toast
-        if (!InStr(options, "M"))
-        { ; Default windows notification
-            Menu, Tray, NoIcon ; Kills the notification ballon
+    ; Message can't be empty
+    message := (message = "") ? " " :  message
+
+    if (design = "Balloon")
+    {
+        ; parse configuration
+        flags := (doSound) ? 0x0 : 0x10 ; mute if necessary
+
+        if (styleIcon = "Error") {
+            flags |= 0x3
+        } else if (styleIcon = "Info" || styleIcon = "Question") {
+            flags |= 0x1
+        } else if (styleIcon = "Warning") {
+            flags |= 0x2
+        }
+
+        ; display notification
+        TrayTip, % title, % message,, % flags
+
+        ; await timeout
+        if (timeout != -1)
+        {
+            Sleep, timeout * 1000
+
+            ; Kill the notification queue and all it's balloons
+            Menu, Tray, NoIcon
             Sleep, 10
             Menu, Tray, Icon
         }
     }
-    else
-    { ; Valid notification text
-        message := (message = "") ? " " :  message  ; Message can't be empty
-
-        flags := 0   ; Read options
-        if (InStr(options, "M") || domain = "TUV")
-        { ; Use MsgBox Dialog (pauses script)
-            flags += (InStr(options, "I")) ? 0x40 : 0
-            flags += (InStr(options, "W")) ? 0x30 : 0
-            flags += (InStr(options, "E")) ? 0x10 : 0
-
-            MsgBox, % flags, % title, % message
+    else 
+    {
+        ; parse configuration
+        ; Override the second hex letter in options
+        if (styleIcon = "Error") {
+            options := (options & ~0xf0) | 0x10
+        } else if (styleIcon = "Info") {
+            options := (options & ~0xf0) | 0x40
+        } else if (styleIcon = "Question") {
+            options := (options & ~0xf0) | 0x20
+        } else if (styleIcon = "Warning") {
+            options := (options & ~0xf0) | 0x30
         }
-        else
-        { ; Default windows notification
-            flags += (InStr(options, "I")) ? 0x1 : 0
-            flags += (InStr(options, "W")) ? 0x2 : 0
-            flags += (InStr(options, "E")) ? 0x3 : 0
-            flags += (InStr(options, "S")) ? 0x10 : 0
-
-            TrayTip, % title, % message,, % flags
-        }
+        
+        ; display notification        
+        MsgBox, % options, % title, % message, % timeout
+        
     }
 }
 
