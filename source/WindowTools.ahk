@@ -171,7 +171,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger down)
                     else
                     { ; Cannot find image! => No client open
                         killTarget := "none"
-                        toastQuestion("No more clients found!", "Do you want to exit?", 3)
+                        toastQuestion("No more clients found!", "Do you want to exit?", 3, false, 0x4)
                         IfMsgBox, Yes
                         {
                             killTarget := "Window"
