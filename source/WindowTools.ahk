@@ -21,18 +21,19 @@ Menu, Tray, Add, Send Ctrl+Pause, SendCtrlBreak
 SetNumLockState, AlwaysOn
 return
 
-; ===== Global shortcuts: =====
-; Modifier keys:    # Win    ^ Ctrl    + Shift    ! Alt
-; Notifications flags:
+; ==================== Window Lists: ====================
 
-; -=-=-=-=-=- Windows Media API -=-=-=-=-=-
-; Enables remote media control for Netflix, PrimeVideo
+BrowserActive() { ; Is the active window a browser?
+    return WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe") || WinActive("ahk_exe chrome.exe")
+}
 
-; Is active window a media player?
-MediaPlayerActive() {
+MediaPlayerActive() { ; Is active window a media player?
     return (WinActive("Netflix ahk_class ApplicationFrameWindow") ;  Netflix
         || WinActive("Amazon Prime Video for Windows ahk_class ApplicationFrameWindow")) ; PrimeVideo
 }
+
+; ==================== Windows Media API ====================
+; Enables remote media control for Netflix, PrimeVideo
 
 ; Play/Pause media (Netflix, PrimeVideo)
 Media_Play_Pause::
@@ -70,43 +71,11 @@ MediaWind(direction)
     return
 }
 
-; Bring the Rainmeter widgets to the foreground (Win + Shift + R)
-; - can be used as screensaver
-#+r::
-    Run, restartRainmeter.ps1.bat
-return
-
-; Convert screen region to text (Optical character recognition)
-; - Uses external program Capture2Text.exe
-!+PrintScreen:: ; Reuse last region: (Shift + Alt + PrintScreen)
-!PrintScreen::  ; Select new region          (Alt + PrintScreen)
-    PressingShiftKey := GetKeyState("Shift", "P")
-    
-    CoordMode, mouse, screen
-    MouseGetPos, MouseX, MouseY
-
-    Process, Exist, Capture2Text.exe ; Check whether AutoHotkey.exe is running
-    If (ErrorLevel = 0) 
-    { ; Capture2Text isn't running
-        Run, % ProgramFiles "\Capture2Text\Capture2Text.exe"
-        toast("Capture2Text wasn't running", "Launching it..", "S M")
-        
-        ; Launch Capture2Text
-        ErrorLevel := 0
-        while (ErrorLevel = 0)
-        {
-            Process, Exist, Capture2Text.exe ; Check whether AutoHotkey.exe is running
-        }
-
-        Sleep, 1000
-        MouseMove, % MouseX, % MouseY ; Restore previous mouse position
-        Send % (PressingShiftKey) ? "!+{PrintScreen}" : "!{PrintScreen}"
-    }
-return
-
-^Pause:: ; Close all windows of that process    (Ctrl + Three finger gesture down)
-+Pause:: ; Close window                        (Shift + Three finger gesture down)
-Pause:: ; Close tab if existing otherwise close window (Three finger gesture down)
+; ==================== Touchpad gestures ====================
+; ===== Close gesture =====
+^Pause:: ; Close all windows of that process    (Ctrl + Three finger down)
++Pause:: ; Close window                        (Shift + Three finger down)
+Pause:: ; Close tab if existing otherwise close window (Three finger down)
     if (GetKeyState("Ctrl", "P")) ; Is Ctrl pressed?
     { ; Close active window group
         ; Retrive information about active window group
@@ -159,7 +128,7 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
     else
     { ; Close tab (if existing), otherwise close window
         killTarget := "Window"
-        if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe"))
+        if (BrowserActive())
         { ; A browser is active
             killTarget := "Tab"
         }
@@ -175,17 +144,47 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
                 killTarget := "Tab"
             }
         }
+        else if (WinActive("ahk_exe bMC.exe"))
+        { ; Baramundi Managment Center
+            ; Is the active tab a client?
+            image := getFile("BMC Active client.png", [".", "..\resources"])
+            if (locateImageInWindow("ahk_exe bMC.exe", image))
+            { ; Found image! => Active tab is a client
+                killTarget := "Tab"
+            }
+            else
+            { ; Cannot find image! => No client is active
+                ; Is there an inactive client open?
+                image := getFile("BMC Inactive client.png", [".", "..\resources"])
+                if (clickImageInWindow("ahk_exe bMC.exe", image))
+                { ; Found image! => Switched to inactive client
+                    killTarget := "Tab"
+                }
+                else
+                { ; Cannot find image! => No clients are open
+                    ; Protected tab shoundn't be closed
+                    image := getFile("BMC Expand client.png", [".", "..\resources"])
+                    if (clickImageInWindow("ahk_exe bMC.exe", image))
+                    { ; Found image! => At least one client open
+                        killTarget := "none"
+                    }
+                    else
+                    { ; Cannot find image! => No client open
+                        killTarget := "none"
+                        toastQuestion("No more clients found!", "Do you want to exit?", 3, false, 0x4)
+                        IfMsgBox, Yes
+                        {
+                            killTarget := "Window"
+                        }
+                    }
+                }
+            }
+        }
         else if (WinActive("ahk_exe gitkraken.exe"))
         { ; GitKraken is active but no tab is open
-            ; Find Gitkraken window
-            CoordMode, pixel, screen
-            WinGetPos, gitkrakenX, gitkrakenY, gitkrakenWidth, gitkrakenHeight, % "ahk_exe gitkraken.exe"
-            
-            ; Is the close tab cross visible? = Multiple tabs open?
-            tabCrossImage := getFile("GitKraken NoTabCross.png", [".", "..\resources"])
-            ImageSearch, imageX, imageY, gitkrakenX, gitkrakenY, % gitkrakenX + gitkrakenWidth, % gitkrakenY + gitkrakenHeight, % tabCrossImage
-            if (ErrorLevel)
-            { ; At least one tab open
+            image := getFile("GitKraken single empty tab.png", [".", "..\resources"])
+            if (!locateImageInWindow("ahk_exe gitkraken.exe", image))
+            { ; Cannot find image! => At least one tab open
                 killTarget := "Tab"
             }
         }
@@ -200,14 +199,18 @@ Pause:: ; Close tab if existing otherwise close window (Three finger gesture dow
     }
 return
 
-#o::
-    Run, % "explorer shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}"
-return
-
-; Open new tab / Open action center
-; Activated by touchpad (internal shortcut)
-CtrlBreak::
-    if (WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe msedge.exe") || WinActive("ahk_exe gitkraken.exe"))
+; ===== Open gesture =====
+CtrlBreak:: ; Open new tab / Open action center (Three finger tap)
+    if (WinActive("ahk_exe bMC.exe"))
+    { ; Baramundi Managment Center
+        ; Open the Environment tab?
+        image := getFile("BMC environment tab.png", [".", "..\resources"])
+        if (!clickImageInWindow("ahk_exe bMC.exe", image))
+        { ; Cannot find image!
+            toastError("Cannot find Environment tab")
+        }
+    }
+    else if (BrowserActive() || WinActive("ahk_exe gitkraken.exe"))
     { ; Browser(like) window is active
         Send, ^t ; Open new tab
     }
@@ -216,6 +219,8 @@ CtrlBreak::
         Send, #a ; Open action center
     }
 return
+
+; ==================== Window shortcuts ====================
 
 ; Pin active window always on top (Win + Numpad-)
 #NumpadSub::
@@ -240,6 +245,8 @@ return
     Sleep, 2000
     Send, {LWin}
 return
+
+; ==================== Transparency shortcuts ====================
 
 ; Make active window transparent
 ; - Uses external program nircmd in path location
@@ -287,14 +294,14 @@ return
 
 ; Send PAUSE
 SendPause:
-    toast("Send PAUSE", "Sending PAUSE in 2s", "S")
+    toastInfo("Send PAUSE", "Sending PAUSE in 2s",, false)
     Sleep, 2000
     Send, % "{Pause}"
 return
 
 ; Send CTRL + PAUSE
 SendCtrlBreak:
-    toast("Send PAUSE", "Sending CTRL + PAUSE in 2s", "S")
+    toastInfo("Send PAUSE", "Sending CTRL + PAUSE in 2s",, false)
     Sleep, 2000
     Send, % "{CtrlBreak}"
 return
